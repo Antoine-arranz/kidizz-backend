@@ -5,21 +5,24 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Daycare } from './dayCare.entity';
+import { ChildCare } from './childCare.entity';
 import { CreateChildCaresDto } from './dto/create-child-cares.dto';
 import { User } from 'src/Users/user.entity';
+import { Child } from 'src/Childs/child.entity';
 
 @Injectable()
-export class DaycareService {
+export class ChildCareService {
   constructor(
-    @InjectRepository(Daycare)
-    private readonly daycareRepository: Repository<Daycare>,
+    @InjectRepository(ChildCare)
+    private readonly childCareRepository: Repository<ChildCare>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Child)
+    private readonly childRepository: Repository<Child>,
   ) {}
 
-  async findAll(): Promise<Daycare[]> {
-    return this.daycareRepository.find();
+  async findAll(): Promise<ChildCare[]> {
+    return this.childCareRepository.find();
   }
 
   async addChildCares(
@@ -31,12 +34,12 @@ export class DaycareService {
     if (!user) {
       throw new NotFoundException(`User with username ${username} not found`);
     }
-    const newChildCare = this.daycareRepository.create({
+    const newChildCare = this.childCareRepository.create({
       ...createChildCareDto,
       creator: user,
     });
 
-    this.daycareRepository.save(newChildCare);
+    this.childCareRepository.save(newChildCare);
   }
 
   async deleteChildCare(id: string, username: string): Promise<void> {
@@ -46,20 +49,29 @@ export class DaycareService {
       throw new NotFoundException(`User with username "${username}" not found`);
     }
 
-    const daycare = await this.daycareRepository.findOne({
+    const childCare = await this.childCareRepository.findOne({
       where: { id: parseInt(id) },
       relations: ['creator'],
     });
 
-    if (!daycare) {
-      throw new NotFoundException(`Daycare with ID "${id}" not found`);
+    if (!childCare) {
+      throw new NotFoundException(`Child care with ID "${id}" not found`);
     }
-    if (daycare.creator.id !== user.id) {
+    if (childCare.creator.id !== user.id) {
       throw new ForbiddenException(
         `Vous n'etes pas autorisé à supprimer cette crêche`,
       );
     }
 
-    await this.daycareRepository.remove(daycare);
+    await this.childCareRepository.remove(childCare);
+  }
+
+  async getChildrenByChildCare(childCareId: number): Promise<Child[]> {
+    return this.childRepository.find({
+      where: { childCares: { id: childCareId } },
+    });
+  }
+  async findOne(id: number): Promise<ChildCare | null> {
+    return this.childCareRepository.findOne({ where: { id } });
   }
 }

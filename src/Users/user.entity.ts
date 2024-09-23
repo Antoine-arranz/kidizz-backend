@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { Daycare } from '../DayCares/dayCare.entity';
+import { ChildCare } from '../ChildCares/childCare.entity';
 import { Child } from '../Childs/child.entity';
 
 @Entity()
@@ -13,8 +13,8 @@ export class User {
   @Column()
   username: string;
 
-  @OneToMany(() => Daycare, (daycare) => daycare.creator)
-  daycares: Daycare[];
+  @OneToMany(() => ChildCare, (childCare) => childCare.creator)
+  childCares: ChildCare[];
 
   @OneToMany(() => Child, (child) => child.creator)
   children: Child[];

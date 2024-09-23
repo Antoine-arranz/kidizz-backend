@@ -7,7 +7,7 @@ import {
   JoinTable,
 } from 'typeorm';
 import { User } from '../Users/user.entity';
-import { Daycare } from '../DayCares/dayCare.entity';
+import { ChildCare } from '../ChildCares/childCare.entity';
 
 @Entity()
 export class Child {
@@ -23,7 +23,7 @@ export class Child {
   @ManyToOne(() => User, (user) => user.children)
   creator: User;
 
-  @ManyToMany(() => Daycare)
+  @ManyToMany(() => ChildCare)
   @JoinTable()
-  daycares: Daycare[];
+  childCares: ChildCare[];
 }
