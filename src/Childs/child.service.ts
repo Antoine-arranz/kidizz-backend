@@ -76,7 +76,7 @@ export class ChildService {
 
     if (child.creator.id !== user.id) {
       throw new UnauthorizedException(
-        'You are not authorized to remove this child',
+        `Vous n'etes pas autorisé à supprimer cette enfant`,
       );
     }
 
@@ -103,5 +103,31 @@ export class ChildService {
         { lastName: Like(`%${name}%`) },
       ],
     });
+  }
+
+  async associateChildWithChildCare(
+    childId: number,
+    childCareId: number,
+  ): Promise<void> {
+    const child = await this.childRepository.findOne({
+      where: { id: childId },
+      relations: ['childCares'],
+    });
+    if (!child) {
+      throw new NotFoundException(`Child with ID ${childId} not found`);
+    }
+
+    const childCare = await this.childCareRepository.findOne({
+      where: { id: childCareId },
+      relations: ['creator'],
+    });
+    if (!childCare) {
+      throw new NotFoundException(`ChildCare with ID ${childCareId} not found`);
+    }
+
+    if (!child.childCares.some(cc => cc.id === childCare.id)) {
+      child.childCares.push(childCare);
+      await this.childRepository.save(child);
+    }
   }
 }

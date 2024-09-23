@@ -57,4 +57,12 @@ export class ChildController {
     }
     return this.childService.searchByName(name);
   }
+
+  @Post('/:childId/associate/:childCareId')
+  async associateChildWithChildCare(
+    @Param('childId') childId: string,
+    @Param('childCareId') childCareId: string,
+  ): Promise<void> {
+    await this.childService.associateChildWithChildCare(+childId, +childCareId);
+  }
 }
