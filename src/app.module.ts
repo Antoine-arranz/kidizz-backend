@@ -9,4 +9,4 @@ import { IsUniqueConstraint } from './shared/validation/is-unique-contraint';
   controllers: [],
   providers: [IsUniqueConstraint],
 })
-export class AppModule { }
+export class AppModule {}

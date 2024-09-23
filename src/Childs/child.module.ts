@@ -7,7 +7,11 @@ import { UserModule } from 'src/Users/user.module';
 import { ChildCareModule } from 'src/ChildCares/childCare.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Child]), UserModule,forwardRef(() => ChildCareModule)],
+  imports: [
+    TypeOrmModule.forFeature([Child]),
+    UserModule,
+    forwardRef(() => ChildCareModule),
+  ],
   providers: [ChildService],
   controllers: [ChildController],
   exports: [TypeOrmModule],

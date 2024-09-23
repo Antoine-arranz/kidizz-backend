@@ -82,7 +82,9 @@ export class ChildService {
 
     const childCare = child.childCares.find((d) => d.id === childCareId);
     if (!childCare) {
-      throw new NotFoundException('Child is not associated with this childCare');
+      throw new NotFoundException(
+        'Child is not associated with this childCare',
+      );
     }
 
     child.childCares = child.childCares.filter((d) => d.id !== childCareId);

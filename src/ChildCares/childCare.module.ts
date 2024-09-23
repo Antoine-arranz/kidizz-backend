@@ -14,6 +14,6 @@ import { ChildModule } from 'src/Childs/child.module';
   ],
   providers: [ChildCareService],
   controllers: [ChildCareController],
-  exports:[TypeOrmModule]
+  exports: [TypeOrmModule],
 })
 export class ChildCareModule {}
