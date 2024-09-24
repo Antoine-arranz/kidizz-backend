@@ -27,14 +27,14 @@ export class ChildCareController {
   }
 
   @Post()
-  async addChildCares(
+  async addChildCare(
     @Body(ValidationPipe) createChildCareDto: CreateChildCaresDto,
     @Headers('X-Auth') username: string,
   ): Promise<void> {
     if (!username) {
       throw new Error('Missing X-Auth header');
     }
-    this.childCareService.addChildCares(createChildCareDto, username);
+    this.childCareService.addChildCare(createChildCareDto, username);
   }
 
   @Delete('/:id')
@@ -46,10 +46,5 @@ export class ChildCareController {
       throw new Error('Missing X-Auth header');
     }
     await this.childCareService.deleteChildCare(id, username);
-  }
-
-  @Get('/:id/children')
-  async getChildrenByChildCare(@Param('id') childCareId: number) {
-    return this.childCareService.getChildrenByChildCare(childCareId);
   }
 }
