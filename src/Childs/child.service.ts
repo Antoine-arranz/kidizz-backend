@@ -18,7 +18,7 @@ export class ChildService {
     private readonly childRepository: Repository<Child>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(ChildCare) // Ajout du repository de la crèche
+    @InjectRepository(ChildCare)
     private readonly childCareRepository: Repository<ChildCare>,
   ) {}
 

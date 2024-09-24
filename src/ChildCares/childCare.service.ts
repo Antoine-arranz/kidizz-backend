@@ -77,13 +77,12 @@ export class ChildCareService {
         creatorEmails.add(child.creator.email);
       }
     });
-   
+
     // Ajouter les e-mails à la file d'attente
     for (const email of creatorEmails) {
       await this.emailQueueService.addToQueue(email);
     }
 
-    // Supprimer la crèche
     await this.childCareRepository.remove(childCare);
   }
 

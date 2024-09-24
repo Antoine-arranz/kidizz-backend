@@ -11,7 +11,7 @@ import { ChildModule } from './Childs/child.module';
     DatabaseModule,
     ChildCareModule,
     UserModule,
-    EmailQueueModule,  // Assurez-vous que cette ligne est présente
+    EmailQueueModule,
     ChildModule,
   ],
   controllers: [],
