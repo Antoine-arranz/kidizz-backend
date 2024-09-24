@@ -130,4 +130,10 @@ export class ChildService {
       await this.childRepository.save(child);
     }
   }
+
+    async getChildrenByChildCare(childCareId: number): Promise<Child[]> {
+    return this.childRepository.find({
+      where: { childCares: { id: childCareId } },
+    });
+  }
 }

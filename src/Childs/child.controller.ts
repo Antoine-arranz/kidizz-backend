@@ -65,4 +65,9 @@ export class ChildController {
   ): Promise<void> {
     await this.childService.associateChildWithChildCare(+childId, +childCareId);
   }
+
+  @Get('/:id/children')
+  async getChildrenByChildCare(@Param('id') childCareId: number) {
+    return this.childService.getChildrenByChildCare(childCareId);
+  }
 }

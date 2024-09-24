@@ -1,24 +1,21 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ChildCare } from './childCare.entity';
 import { CreateChildCaresDto } from './dto/create-child-cares.dto';
 import { User } from 'src/Users/user.entity';
-import { Child } from 'src/Childs/child.entity';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+import { EmailQueueService } from 'src/email/email-queue.service';
 
 @Injectable()
 export class ChildCareService {
   constructor(
     @InjectRepository(ChildCare)
-    private readonly childCareRepository: Repository<ChildCare>,
+    private childCareRepository: Repository<ChildCare>,
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(Child)
-    private readonly childRepository: Repository<Child>,
+    private userRepository: Repository<User>,
+    private emailQueueService: EmailQueueService,
   ) {}
 
   async findAll(): Promise<ChildCare[]> {
@@ -42,7 +39,7 @@ export class ChildCareService {
     this.childCareRepository.save(newChildCare);
   }
 
-  async deleteChildCare(id: string, username: string): Promise<void> {
+ async deleteChildCare(id: string, username: string): Promise<void> {
     const user = await this.userRepository.findOne({ where: { username } });
 
     if (!user) {
@@ -57,20 +54,28 @@ export class ChildCareService {
     if (!childCare) {
       throw new NotFoundException(`Child care with ID "${id}" not found`);
     }
+
     if (childCare.creator.id !== user.id) {
       throw new ForbiddenException(
-        `Vous n'etes pas autorisé à supprimer cette crêche`,
+        `Vous n'êtes pas autorisé à supprimer cette crèche`,
       );
     }
 
-    await this.childCareRepository.remove(childCare);
+    // Récupérer tous les enfants de la crèche
+    const children = await this.getChildrenByChildCare(parseInt(id));
+
+    // Récupérer les e-mails uniques des créateurs d'enfants, en excluant l'initiateur de la suppression
+    const creatorEmails = [...new Set(children
+      .map(child => child.creator.email)
+      .filter(email => email !== user.email))];
+
+   // Ajouter les e-mails à la file d'attente
+    await this.emailQueueService.addEmailsToQueue(creatorEmails);
+
+    // Supprimer la crèche
+    // await this.childCareRepository.remove(childCare);
   }
 
-  async getChildrenByChildCare(childCareId: number): Promise<Child[]> {
-    return this.childRepository.find({
-      where: { childCares: { id: childCareId } },
-    });
-  }
   async findOne(id: number): Promise<ChildCare | null> {
     return this.childCareRepository.findOne({ where: { id } });
   }

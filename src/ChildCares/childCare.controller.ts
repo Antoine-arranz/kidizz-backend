@@ -48,8 +48,5 @@ export class ChildCareController {
     await this.childCareService.deleteChildCare(id, username);
   }
 
-  @Get('/:id/children')
-  async getChildrenByChildCare(@Param('id') childCareId: number) {
-    return this.childCareService.getChildrenByChildCare(childCareId);
-  }
+  
 }
