@@ -15,6 +15,10 @@ import { ChildService } from './child.service';
 import { CreateChildDto } from './dto/create-child.dto';
 import { Child } from './child.entity';
 import { Response } from 'express';
+import { pipeline } from 'stream';
+import { promisify } from 'util';
+
+const pipelineAsync = promisify(pipeline);
 
 @Controller('child')
 export class ChildController {
@@ -75,14 +79,30 @@ export class ChildController {
 
   @Get('export.csv')
   async exportChildren(
-    @Query('childCareId') childCareId: number,
     @Res() res: Response,
+    @Query('childCareId') childCareId?: number,
   ) {
-    const csvStream = await this.childService.getChildrenCsvStream(childCareId);
+    try {
+      const csvStream =
+        await this.childService.getChildrenCsvStream(childCareId);
+      const fileName = childCareId ? 'children' : 'childCares'
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename=${fileName}.csv`);
 
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename=children.csv');
-
-    csvStream.pipe(res);
+      pipeline(csvStream, res, (err) => {
+        if (err) {
+          if (!res.headersSent) {
+            res.status(500).json({
+              message: "Une erreur est survenue lors de l'exportation du CSV.",
+            });
+          }
+        }
+      });
+    } catch (error) {
+      res.status(500).json({
+        message:
+          "Une erreur est survenue lors de la préparation de l'exportation.",
+      });
+    }
   }
 }
