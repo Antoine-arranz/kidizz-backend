@@ -21,17 +21,19 @@ export class EmailQueueService {
     // Marquer le traitement comme en cours
     this.isProcessing = true;
     while (this.queue.length > 0) {
-       // Récupérer un lot de 3 tâches
+      // Récupérer un lot de 3 tâches
       const batch = this.queue.splice(0, 3);
       // Traiter chaque tâche du lot en parallèle
-      await Promise.all(batch.map(task => this.informStructureDeletion(task.userEmail)));
+      await Promise.all(
+        batch.map((task) => this.informStructureDeletion(task.userEmail)),
+      );
     }
     this.isProcessing = false;
   }
 
   private async informStructureDeletion(userEmail: string): Promise<void> {
     const secondsToWait = Math.trunc(Math.random() * 7) + 1;
-    return new Promise<void>(resolve => {
+    return new Promise<void>((resolve) => {
       setTimeout(() => {
         console.log(userEmail, 'informed!');
         resolve();

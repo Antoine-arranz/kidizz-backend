@@ -12,7 +12,7 @@ import { ChildModule } from 'src/Childs/child.module';
     TypeOrmModule.forFeature([ChildCare]),
     UserModule,
     EmailQueueModule,
-    forwardRef(() => ChildModule)
+    forwardRef(() => ChildModule),
   ],
   providers: [ChildCareService],
   controllers: [ChildCareController],

@@ -7,12 +7,14 @@ import {
   Param,
   Post,
   Query,
+  Res,
   UnauthorizedException,
   ValidationPipe,
 } from '@nestjs/common';
 import { ChildService } from './child.service';
 import { CreateChildDto } from './dto/create-child.dto';
 import { Child } from './child.entity';
+import { Response } from 'express';
 
 @Controller('child')
 export class ChildController {
@@ -69,5 +71,18 @@ export class ChildController {
   @Get('/child-care/:id/children')
   async getChildrenByChildCare(@Param('id') childCareId: number) {
     return this.childService.getChildrenByChildCare(childCareId);
+  }
+
+  @Get('export.csv')
+  async exportChildren(
+    @Query('childCareId') childCareId: number,
+    @Res() res: Response,
+  ) {
+    const csvStream = await this.childService.getChildrenCsvStream(childCareId);
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=children.csv');
+
+    csvStream.pipe(res);
   }
 }

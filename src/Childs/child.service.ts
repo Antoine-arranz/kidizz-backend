@@ -10,6 +10,7 @@ import { Child } from 'src/Childs/child.entity';
 import { CreateChildDto } from './dto/create-child.dto';
 import { User } from 'src/Users/user.entity';
 import { ChildCare } from 'src/ChildCares/childCare.entity';
+import { Transform, Readable } from 'stream';
 
 @Injectable()
 export class ChildService {
@@ -125,15 +126,69 @@ export class ChildService {
       throw new NotFoundException(`ChildCare with ID ${childCareId} not found`);
     }
 
-    if (!child.childCares.some(cc => cc.id === childCare.id)) {
+    if (!child.childCares.some((cc) => cc.id === childCare.id)) {
       child.childCares.push(childCare);
       await this.childRepository.save(child);
     }
   }
 
-    async getChildrenByChildCare(childCareId: number): Promise<Child[]> {
+  async getChildrenByChildCare(childCareId: number): Promise<Child[]> {
     return this.childRepository.find({
       where: { childCares: { id: childCareId } },
     });
+  }
+
+  async getChildrenCsvStream(childCareId?: number): Promise<Readable> {
+    const batchSize = 1000; // Taille du lot
+    let offset = 0;
+    let hasMore = true;
+    let headerPushed = false;
+
+    const childRepository = this.childRepository;
+    const readable = new Readable({
+      objectMode: true,
+      async read() {
+        if (!headerPushed) {
+          // Ajouter l'en-tête CSV
+          this.push('ID;First Name;Last Name;Child Cares\r\n');
+          headerPushed = true;
+          return;
+        }
+
+        if (!hasMore) {
+          this.push(null); // Fin du flux lorsque plus de données
+          return;
+        }
+
+        let query = childRepository
+          .createQueryBuilder('child')
+          .leftJoinAndSelect('child.childCares', 'childCare')
+          .orderBy('child.lastName', 'ASC')
+          .skip(offset)
+          .take(batchSize);
+
+        if (childCareId) {
+          query = query.where('childCare.id = :childCareId', { childCareId });
+        }
+
+        const childrenBatch = await query.getMany();
+
+        if (childrenBatch.length === 0) {
+          hasMore = false; // Plus de données à traiter
+          this.push(null); // Indiquer la fin du flux
+          return;
+        }
+
+        // Transformer chaque enfant en ligne CSV
+        for (const child of childrenBatch) {
+          const csvRow = `${child.id};${child.firstName};${child.lastName};"${child.childCares.map((c) => c.name).join(', ')}"\r\n`;
+          this.push(csvRow); // Pousser la ligne CSV dans le flux
+        }
+
+        offset += batchSize; // Passer au prochain lot
+      },
+    });
+
+    return readable;
   }
 }
