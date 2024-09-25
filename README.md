@@ -1,4 +1,4 @@
-# Kidizz - Gestion de Crèches
+# Kidizz API - Gestion de Crèches
 
 ## Description du Projet
 
@@ -6,10 +6,11 @@ Kidizz est une application de gestion d'enfants et de crèches, développée dan
 
 ## Technologies Utilisées
 
-- Frontend : Vue 3
-- Backend : Nest.js
+- Nest.js
 - Base de données : TypeORM avec Postgres
 - Langage : TypeScript
+- pg-query-stream
+- class-validator
 
 ## Fonctionnalités Principales
 
@@ -23,9 +24,9 @@ Kidizz est une application de gestion d'enfants et de crèches, développée dan
 
 ### Prérequis
 
-- Node.js (version recommandée)
+- Node.js
 - NPM ou Yarn
-- [Votre choix de BDD SQL]
+- Postgres
 
 ### Installation
 
