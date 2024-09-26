@@ -82,9 +82,12 @@ export class ChildController {
     try {
       const csvStream =
         await this.childService.getChildrenCsvStream(childCareId);
-      const fileName = childCareId ? 'children' : 'childCares'
+      const fileName = childCareId ? 'children' : 'childCares';
       res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', `attachment; filename=${fileName}.csv`);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename=${fileName}.csv`,
+      );
 
       pipeline(csvStream, res, (err) => {
         if (err) {
