@@ -2,8 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  NotFoundException,
-  Param,
   Put,
   Query,
   ValidationPipe,

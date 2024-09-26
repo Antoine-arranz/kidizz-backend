@@ -16,9 +16,6 @@ import { CreateChildDto } from './dto/create-child.dto';
 import { Child } from './child.entity';
 import { Response } from 'express';
 import { pipeline } from 'stream';
-import { promisify } from 'util';
-
-const pipelineAsync = promisify(pipeline);
 
 @Controller('child')
 export class ChildController {
