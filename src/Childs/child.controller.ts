@@ -5,6 +5,7 @@ import {
   Get,
   Headers,
   Param,
+  ParseIntPipe,
   Post,
   Query,
   Res,
@@ -16,6 +17,7 @@ import { CreateChildDto } from './dto/create-child.dto';
 import { Child } from './child.entity';
 import { Response } from 'express';
 import { pipeline } from 'stream';
+import { SearchChildDto } from 'src/ChildCares/dto/search-child.dto';
 
 @Controller('child')
 export class ChildController {
@@ -23,7 +25,8 @@ export class ChildController {
 
   @Post()
   async addChild(
-    @Body(ValidationPipe) createChildDto: CreateChildDto,
+    @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+    createChildDto: CreateChildDto,
     @Headers('X-Auth') username: string,
   ): Promise<void> {
     if (!username) {
@@ -39,45 +42,48 @@ export class ChildController {
 
   @Delete('/:childCareId/child/:childId')
   async removeChildFromChildCare(
-    @Param('childCareId') childCareId: string,
-    @Param('childId') childId: string,
+    @Param('childCareId', ParseIntPipe) childCareId: number,
+    @Param('childId', ParseIntPipe) childId: number,
     @Headers('X-Auth') username: string,
   ): Promise<void> {
     if (!username) {
       throw new UnauthorizedException('Missing X-Auth header');
     }
     await this.childService.removeChildFromChildCare(
-      +childCareId,
-      +childId,
+      childCareId,
+      childId,
       username,
     );
   }
 
   @Get('search')
-  async searchByName(@Query('name') name: string): Promise<Child[]> {
-    if (!name) {
+  async searchByName(
+    @Query(ValidationPipe) searchChildDto: SearchChildDto,
+  ): Promise<Child[]> {
+    if (!searchChildDto) {
       throw new UnauthorizedException('Veuillez indiquer un nom');
     }
-    return this.childService.searchByName(name);
+    return this.childService.searchByName(searchChildDto);
   }
 
   @Post('/:childId/associate/:childCareId')
   async associateChildWithChildCare(
-    @Param('childId') childId: string,
-    @Param('childCareId') childCareId: string,
+    @Param('childId', ParseIntPipe) childId: number,
+    @Param('childCareId', ParseIntPipe) childCareId: number,
   ): Promise<void> {
-    await this.childService.associateChildWithChildCare(+childId, +childCareId);
+    await this.childService.associateChildWithChildCare(childId, childCareId);
   }
 
   @Get('/child-care/:id/children')
-  async getChildrenByChildCare(@Param('id') childCareId: number) {
+  async getChildrenByChildCare(@Param('id', ParseIntPipe) childCareId: number) {
     return this.childService.getChildrenByChildCare(childCareId);
   }
 
   @Get('export.csv')
   async exportChildren(
     @Res() res: Response,
-    @Query('childCareId') childCareId?: number,
+    @Query('childCareId', new ParseIntPipe({ optional: true }))
+    childCareId?: number,
   ) {
     try {
       const csvStream =

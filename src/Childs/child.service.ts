@@ -10,6 +10,8 @@ import { CreateChildDto } from './dto/create-child.dto';
 import { User } from 'src/Users/user.entity';
 import { ChildCare } from 'src/ChildCares/childCare.entity';
 import { Readable } from 'stream';
+import { SearchChildDto } from 'src/ChildCares/dto/search-child.dto';
+import { escapeRegExp } from 'lodash';
 
 @Injectable()
 export class ChildService {
@@ -96,11 +98,13 @@ export class ChildService {
     }
   }
 
-  async searchByName(name: string): Promise<Child[]> {
+  async searchByName(searchChildDto: SearchChildDto): Promise<Child[]> {
+    const escapedName = escapeRegExp(searchChildDto.name);
+
     return this.childRepository.find({
       where: [
-        { firstName: Like(`%${name}%`) },
-        { lastName: Like(`%${name}%`) },
+        { firstName: Like(`%${escapedName}%`) },
+        { lastName: Like(`%${escapedName}%`) },
       ],
     });
   }

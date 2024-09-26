@@ -44,14 +44,14 @@ export class ChildCareService {
     this.childCareRepository.save(newChildCare);
   }
 
-  async deleteChildCare(id: string, username: string): Promise<void> {
+  async deleteChildCare(id: number, username: string): Promise<void> {
     const user = await this.userRepository.findOne({ where: { username } });
     if (!user) {
       throw new NotFoundException(`User with username "${username}" not found`);
     }
 
     const childCare = await this.childCareRepository.findOne({
-      where: { id: parseInt(id) },
+      where: { id: id },
       relations: ['creator'],
     });
 
@@ -66,7 +66,7 @@ export class ChildCareService {
 
     //Récupérer tous les enfants associés à cette crèche
     const children = await this.childRepository.find({
-      where: { childCares: { id: parseInt(id) } },
+      where: { childCares: { id: id } },
       relations: ['creator'],
     });
 

@@ -5,6 +5,7 @@ import {
   Get,
   Headers,
   Param,
+  ParseIntPipe,
   Post,
   ValidationPipe,
 } from '@nestjs/common';
@@ -22,13 +23,16 @@ export class ChildCareController {
   }
 
   @Get('/:id')
-  async findOne(@Param('id') id: number): Promise<ChildCare | null> {
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ChildCare | null> {
     return this.childCareService.findOne(id);
   }
 
   @Post()
   async addChildCare(
-    @Body(ValidationPipe) createChildCareDto: CreateChildCaresDto,
+    @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+    createChildCareDto: CreateChildCaresDto,
     @Headers('X-Auth') username: string,
   ): Promise<void> {
     if (!username) {
@@ -39,7 +43,7 @@ export class ChildCareController {
 
   @Delete('/:id')
   async deleteChildCare(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Headers('X-Auth') username: string,
   ): Promise<void> {
     if (!username) {
